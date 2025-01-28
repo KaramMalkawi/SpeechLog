@@ -1,0 +1,47 @@
+<nav class="navbar">
+  <div class="navbar-content">
+    <img
+      src="assets/images/logo.png"
+      alt="CareConnect Logo"
+      class="logo"
+      (click)="navigateTo('patient-home')"
+    />
+    <button class="settings-btn" (click)="navigateTo('patient-profile')">
+      <img src="assets/images/setting.png" alt="Settings" />
+    </button>
+  </div>
+</nav>
+
+<main class="main-content">
+  <button class="back-btn" (click)="navigateTo('patient-home')">&larr;</button>
+  <h1>The Doctors</h1>
+
+  <div class="search-container">
+    <input
+      type="text"
+      placeholder="Search..."
+      [(ngModel)]="searchQuery"
+      (input)="filterDoctors()"
+    />
+  </div>
+
+  <div *ngIf="isLoading">Loading doctors...</div>
+  <div *ngIf="error" class="error-message">{{ error }}</div>
+
+  <ul *ngIf="!isLoading && !error" class="doctor-list">
+    <li
+      class="doctor-item"
+      *ngFor="let doctor of filteredDoctors"
+      (click)="navigateToDoctorView(doctor.userId)"
+    >
+      <div class="doctor-info">
+        <h2>{{ doctor.firstName }} {{ doctor.lastName }}</h2>
+        <p>{{ doctor.description || 'No description available' }}</p>
+      </div>
+    </li>
+  </ul>
+
+  <div *ngIf="!isLoading && filteredDoctors.length === 0" class="no-results">
+    No doctors found.
+  </div>
+</main>

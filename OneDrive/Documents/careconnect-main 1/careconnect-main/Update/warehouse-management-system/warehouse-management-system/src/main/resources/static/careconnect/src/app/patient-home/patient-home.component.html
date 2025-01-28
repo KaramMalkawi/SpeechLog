@@ -1,0 +1,33 @@
+<nav class="navbar">
+    <div class="navbar-content">
+      <img
+        src="assets/images/logo.png"
+        alt="CareConnect Logo"
+        class="logo"
+        (click)="navigateTo('patient-home')"
+      />
+      <button class="settings-btn" (click)="navigateTo('patient-profile')">
+        <img src="assets/images/setting.png" alt="Settings" />
+      </button>
+    </div>
+  </nav>
+  
+  <main class="main-content">
+    <h1>The Departments</h1>
+    <div class="departments">
+      <div
+        class="department-card"
+        *ngFor="let department of departments"
+        (click)="navigateTo('patient-doclist')"
+      >
+        <h2>{{ department.departmentName }}</h2>
+        <p>{{ department.description }}</p>
+      </div>
+      <div *ngIf="isLoading" class="loading">Loading departments...</div>
+      <div *ngIf="!isLoading && departments.length === 0" class="no-data">
+        No departments found.
+      </div>
+    </div>
+  </main>
+  
+  <button class="fab" (click)="navigateTo('patient-report')">+</button>

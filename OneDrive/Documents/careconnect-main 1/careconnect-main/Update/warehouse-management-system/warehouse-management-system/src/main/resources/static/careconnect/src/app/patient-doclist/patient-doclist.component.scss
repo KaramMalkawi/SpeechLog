@@ -1,0 +1,124 @@
+/* Navbar */
+.navbar {
+    background-color: #31bfb1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+ 
+.navbar-content {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+ 
+.logo {
+    height: 40px;
+    cursor: pointer;
+}
+ 
+.navbar-title {
+    color: white;
+    font-size: 24px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+ 
+.settings-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    margin-left: auto;
+}
+ 
+.settings-btn img {
+    height: 30px;
+}
+ 
+/* Main Content */
+.main-content {
+    padding: 20px;
+}
+ 
+.back-btn {
+    background: #31bfb1;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-weight: bold;
+}
+ 
+.main-content h1 {
+    font-size: 28px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+ 
+.search-container {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: center;
+}
+ 
+.search-container input {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #cccccc;
+    border-radius: 5px;
+    outline: none;
+}
+ 
+.search-container input:focus {
+    border-color: #31bfb1;
+}
+ 
+/* Doctor List */
+.doctor-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+ 
+.doctor-item {
+    display: flex;
+    align-items: center;
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+ 
+.doctor-item:hover {
+    background: #f2f2f2;
+}
+ 
+.doctor-avatar {
+    width: 40px;
+    height: 40px;
+    background: #cccccc;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+ 
+.doctor-info h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: bold;
+}
+ 
+.doctor-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #555555;
+}

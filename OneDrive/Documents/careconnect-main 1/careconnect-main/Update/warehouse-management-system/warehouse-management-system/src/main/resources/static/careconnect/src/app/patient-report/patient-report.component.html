@@ -1,0 +1,27 @@
+<nav class="navbar">
+  <div class="navbar-content">
+    <img
+      src="assets/images/logo.png"
+      alt="CareConnect Logo"
+      class="logo"
+      (click)="navigateTo('patient-home')"
+    />
+    <button class="settings-btn" (click)="navigateTo('patient-profile')">
+      <img src="assets/images/setting.png" alt="Settings" />
+    </button>
+  </div>
+</nav>
+
+<button class="back-btn" (click)="navigateTo('patient-home')">&larr;</button>
+
+<div class="report-list" *ngIf="reports.length > 0">
+  <div class="report-item" *ngFor="let report of reports">
+    <h3>Doctor: {{ report.doctor.firstName }} {{ report.doctor.lastName }}</h3>
+    <p><strong>Diagnosis:</strong> {{ report.diagnosis }}</p>
+    <p><strong>Description:</strong> {{ report.description }}</p>
+    <p class="report-date">Date: {{ report.createdAt | date : "medium" }}</p>
+  </div>
+</div>
+<div class="no-reports" *ngIf="reports.length === 0">
+  <p>No reports available</p>
+</div>

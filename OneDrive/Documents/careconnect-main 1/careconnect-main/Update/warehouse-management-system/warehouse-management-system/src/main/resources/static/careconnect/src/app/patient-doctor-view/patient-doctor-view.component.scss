@@ -1,0 +1,103 @@
+/* Navbar */
+.navbar {
+    background-color: #31bfb1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+ 
+.logo {
+    height: 40px;
+    cursor: pointer;
+}
+ 
+.settings-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+ 
+.settings-btn img {
+    height: 30px;
+}
+ 
+/* Container */
+.container {
+    padding: 20px;
+    text-align: center;
+}
+ 
+ 
+.back-btn {
+    background: #31bfb1;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    text-align: left;
+    margin-bottom: 20px;
+    color: #ffffff;
+    font-weight: bold;
+    position: absolute;
+    top: 80px;
+    left: 20px;
+}
+ 
+.btn {
+    background-color: #31bfb1;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+ 
+ 
+/* Doctor Profile */
+.doctor-profile {
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    margin: 0 auto;
+    text-align: center;
+}
+ 
+.profile-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin-bottom: 20px;
+}
+ 
+.doctor-name {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+ 
+.doctor-info {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #555;
+}
+ 
+.reservation-btn {
+    background-color: #31bfb1;
+    color: white;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 20px;
+}
+ 
+.reservation-btn:hover {
+    background-color: #2aa89b;
+}

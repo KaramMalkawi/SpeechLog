@@ -1,0 +1,33 @@
+<div class="navbar">
+    <div class="navbar-icons">
+      <button class="settings-btn" (click)="navigateTo('patient-profile')">
+        <img src="assets/images/setting.png" alt="Settings" /> <!-- Ensure the correct path -->
+      </button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <button class="back-btn" (click)="navigateTo('patient-doclist')">
+      &larr;
+    </button>
+  
+    <div *ngIf="isLoading">Loading doctor details...</div>
+    <div *ngIf="error" class="error-message">{{ error }}</div>
+  
+    <div *ngIf="doctor" class="doctor-profile">
+      <p class="doctor-info">
+        <strong>Department:</strong>
+        {{ doctor.department?.name || "No department specified" }}
+      </p>
+      <p class="doctor-info">
+        <strong>Location:</strong>
+        {{ doctor.location?.address || "No location specified" }}
+      </p>
+      <p class="doctor-info" *ngIf="doctor.phoneNumber">
+        <strong>Phone Number:</strong> {{ doctor.phoneNumber }}
+      </p>
+      <button type="button" class="btn" (click)="navigateTo('patient-zone')">
+        Make a Reservation
+      </button>
+    </div>
+  </div>
