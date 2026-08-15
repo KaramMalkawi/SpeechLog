@@ -1,0 +1,40 @@
+---
+description: DRF API conventions
+globs:
+  - "**/views.py"
+  - "**/serializers.py"
+  - "**/urls.py"
+  - "**/permissions.py"
+alwaysApply: false
+---
+
+# API conventions
+
+- All routes under `/api/v1/`. Version explicitly.
+- DRF ViewSets + serializers + routers for CRUD.
+- Auth: JWT (simplejwt) or OAuth2. Every endpoint requires auth except explicitly
+  public reads (public feed, guidebook browse).
+- Object-level permission classes mapped to roles: Admin, City Founder,
+  Team Member (read-only subset per FR 185), Member, Non-Member.
+- Cursor pagination for feeds/lists (not offset).
+- Validate ALL input via serializers. Never trust client-computed eligibility/results.
+- Keep views thin — delegate to services/selectors.
+
+# OpenAPI docs (drf-spectacular)
+
+Every new API endpoint MUST appear in Swagger UI (`/api/v1/docs/` when enabled).
+
+- Wire routes in the app's `urls.py` and include from `config/urls.py`.
+- ViewSets: set `serializer_class`; add `@extend_schema` / `@extend_schema_view` when
+  actions need custom summary, tags, or non-obvious request/response shapes.
+- `APIView` / function views: MUST use `@extend_schema` with `tags`, `summary`, and
+  typed `request` / `responses` serializers.
+- Reuse serializers for OpenAPI types; add dedicated schema-only serializers when
+  response shape differs from write serializers.
+- Use tags matching the app/domain (`accounts`, `tenancy`, `events`, …). Add new tags
+  to `SPECTACULAR_SETTINGS["TAGS"]` in `config/settings/base.py` when introducing a
+  new bounded context.
+- Document auth requirements (`auth=[]` for public endpoints) and error responses where
+  non-standard.
+- After adding endpoints, verify they show up at `/api/v1/docs/` (local/dev only;
+  disabled in prod via `API_DOCS_ENABLED`).

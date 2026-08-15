@@ -1,0 +1,28 @@
+---
+description: Mixed Miles backend project identity and tech stack
+alwaysApply: true
+---
+
+# Mixed Miles Backend
+
+Multi-tenant community events + membership + marketplace platform.
+Clients: iOS, Android, Web app, plus Admin & City Founder web dashboards.
+
+## Stack (do not deviate without being asked)
+- Python 3.12, Django 5 + Django REST Framework (DRF)
+- PostgreSQL (primary + read replica); no other relational DB
+- Redis: cache, sessions, Celery broker, Channels layer, rate limiting
+- Celery + Celery Beat for ALL async and scheduled work
+- Django Channels for realtime chat
+- S3 + CDN for media (presigned uploads only)
+- Managed services: payment gateway (+webhooks), FCM/APNs, WhatsApp Business API, SES/SendGrid
+- ASGI (Uvicorn/Gunicorn). App servers MUST stay stateless.
+
+Never introduce FastAPI, Flask, SQLAlchemy, Mongo, or GraphQL unless explicitly asked.
+
+## Golden rules
+- Business logic lives in `services.py` (writes) / `selectors.py` (reads), not in views/serializers/models.
+- Views stay thin. Cross-app access goes through the other app's service layer.
+- When unsure about tenancy or a requirement conflict, ASK — don't guess.
+- Do not write README.md
+- Make 

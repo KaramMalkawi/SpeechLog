@@ -1,0 +1,15 @@
+{% extends "emails/base.txt" %}
+
+{% block body %}
+Verify your email — {{ brand_name }}
+
+Hi {{ recipient_name }},
+
+Use this code to verify your {{ brand_name }} account:
+
+{{ otp }}
+
+This code expires in {{ expiry_minutes }} minutes.
+
+If you did not create an account, you can safely ignore this email.
+{% endblock %}

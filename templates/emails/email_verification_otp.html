@@ -1,0 +1,20 @@
+{% extends "emails/base.html" %}
+
+{% block title %}Verify your email — {{ brand_name }}{% endblock %}
+
+{% block headline %}Verify your email{% endblock %}
+
+{% block content %}
+<p style="margin: 0 0 14px; font-size: 16px; line-height: 26px; color: {{ colors.text }};">
+  Hi {{ recipient_name }},
+</p>
+<p style="margin: 0 0 14px; font-size: 16px; line-height: 26px; color: {{ colors.text }};">
+  Use this code to verify your {{ brand_name }} account:
+</p>
+<p style="margin: 0 0 14px; font-size: 32px; line-height: 40px; letter-spacing: 8px; font-weight: 700; color: {{ colors.text }}; text-align: center;">
+  {{ otp }}
+</p>
+<p style="margin: 0 0 8px; font-size: 15px; line-height: 24px; color: {{ colors.muted }};">
+  This code expires in {{ expiry_minutes }} minutes. If you didn’t create an account, you can safely ignore this email.
+</p>
+{% endblock %}

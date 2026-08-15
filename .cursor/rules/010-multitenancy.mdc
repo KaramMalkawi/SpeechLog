@@ -1,0 +1,19 @@
+---
+description: Row-level multi-tenancy rules — always enforce tenant isolation
+alwaysApply: true
+---
+
+# Multi-tenancy (CRITICAL)
+
+Tenancy is ROW-LEVEL in a shared database. Never use schema-per-tenant.
+
+- Tenant-scoped models carry `community_id` AND denormalized `city_id`.
+- City-shared models (housing, community exchange/marketplace, city-wide partners)
+  carry `city_id` ONLY — never `community_id`.
+- Partners have `scope = community | city_wide`.
+- NEVER write a tenant-scoped query without the tenant filter. Use the tenant-aware
+  default manager / middleware; do not rely on remembering to filter manually.
+- Before any query, decide: community-isolated or city-shared? Filter accordingly.
+- Members of one community must NEVER read another community's isolated data.
+- Every feature must be designed so a new community in an existing city instantly
+  sees that city's shared housing/marketplace/city-wide partners.

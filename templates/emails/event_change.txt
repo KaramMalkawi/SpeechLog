@@ -1,0 +1,12 @@
+{% extends "emails/base.txt" %}
+
+{% block body %}
+Hi {{ recipient_name }},
+
+{{ change_message }}
+
+Event: {{ event_title }}
+Location: {{ event_location }}
+Starts: {{ event_start }}
+Ends: {{ event_end }}
+{% endblock %}

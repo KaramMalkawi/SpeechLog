@@ -1,0 +1,16 @@
+{{ brand_name }}
+{{ brand_website_display }}
+
+{% block body %}{% endblock %}
+
+---
+This is an automated message. Please do not reply to this email.
+
+Contact
+{{ support_email }}
+{{ support_phone }}
+{{ support_location }}
+
+{{ brand_website_display }}
+
+© {{ year }} {{ brand_name }}. All rights reserved.

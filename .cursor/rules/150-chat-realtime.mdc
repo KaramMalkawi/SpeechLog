@@ -1,0 +1,16 @@
+---
+description: Realtime chat rules
+globs:
+  - "chat/**"
+  - "**/consumers.py"
+alwaysApply: false
+---
+
+# Realtime chat
+
+- Django Channels + Redis channel layer. Messages persisted in Postgres;
+  connection state in Redis (keep app servers stateless).
+- Connected users -> Direct Messages; unconnected -> Message Requests folder.
+- Support text + image attachments, unread badges, blocking, push on new message.
+- If chat throughput becomes a bottleneck, extract a dedicated async websocket
+  service — but only when metrics justify it.

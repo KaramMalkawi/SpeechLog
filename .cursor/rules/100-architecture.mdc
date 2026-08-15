@@ -1,0 +1,25 @@
+---
+description: How the modular monolith is structured and where code goes
+alwaysApply: false
+---
+
+# Modular monolith layout
+
+One Django project, bounded apps with clear boundaries (extractable later).
+
+Apps: accounts, tenancy, founders, events, gatherings, guidebook, membership, payments,
+social, chat, store, housing, media, trust, notifications, analytics, adminpanel.
+
+Per-app layout:
+- `models.py`         — data only
+- `selectors.py`      — read queries (always tenant-aware)
+- `services.py`       — write/business logic (transactions, external calls)
+- `serializers.py`    — DRF I/O validation
+- `views.py`          — thin DRF viewsets
+- `urls.py`
+- `tasks.py`          — Celery tasks
+- `tests/`
+
+Rules:
+- No cross-app model imports; call the other app's `services`/`selectors`.
+- Settings split: `settings/base.py`, `settings/dev.py`, `settings/prod.py`.

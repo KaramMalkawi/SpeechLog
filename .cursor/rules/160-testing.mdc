@@ -1,0 +1,17 @@
+---
+description: Testing standards
+globs:
+  - "**/tests/**"
+  - "**/test_*.py"
+alwaysApply: false
+---
+
+# Testing
+
+- pytest + pytest-django; factory_boy for fixtures.
+- Every service function and endpoint gets tests.
+- MANDATORY tenancy isolation tests: assert community A cannot read/write
+  community B's data, and that city-shared data IS visible across communities.
+- Cover money/edge cases: attendee hard caps, subscription grace period,
+  QR rate limiting, offer accept/counter/decline flows.
+- Format: black + ruff; type-check with mypy. CI runs all of these.

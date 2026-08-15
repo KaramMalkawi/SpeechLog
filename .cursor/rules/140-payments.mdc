@@ -1,0 +1,17 @@
+---
+description: Payment, subscription, and ticketing rules
+globs:
+  - "payments/**"
+  - "membership/**"
+alwaysApply: false
+---
+
+# Payments & subscriptions
+
+- Never build payment logic yourself — integrate the gateway.
+- State is driven by gateway WEBHOOKS, not client callbacks.
+- All charge/subscription calls use idempotency keys.
+- Subscription lifecycle (renew, expire, 1-week grace, revoke) via Celery Beat + webhooks.
+- On successful payment: async-generate signed QR ticket, then fan out to
+  WhatsApp + email + in-app within 60s.
+- Store no raw card data. Support cards, Apple/Google Pay, and cash-on-arrival.

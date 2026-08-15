@@ -1,0 +1,13 @@
+{% extends "emails/base.html" %}
+
+{% block body %}
+<p>Hi {{ recipient_name }},</p>
+<p>Your ticket for <strong>{{ event_title }}</strong> is ready.</p>
+<p>
+  Location: {{ event_location }}<br>
+  Starts: {{ event_start }}<br>
+  Ends: {{ event_end }}
+</p>
+<p>Show this QR payload at entry:</p>
+<p><code>{{ ticket_qr_payload }}</code></p>
+{% endblock %}

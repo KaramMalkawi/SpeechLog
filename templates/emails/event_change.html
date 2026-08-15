@@ -1,0 +1,12 @@
+{% extends "emails/base.html" %}
+
+{% block body %}
+<p>Hi {{ recipient_name }},</p>
+<p>{{ change_message }}</p>
+<p>
+  Event: <strong>{{ event_title }}</strong><br>
+  Location: {{ event_location }}<br>
+  Starts: {{ event_start }}<br>
+  Ends: {{ event_end }}
+</p>
+{% endblock %}

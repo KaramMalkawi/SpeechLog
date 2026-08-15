@@ -1,0 +1,17 @@
+{% extends "emails/base.txt" %}
+
+{% block body %}
+City Founder invitation — {{ brand_name }}
+
+Hi {{ recipient_name }},
+
+You've been invited to lead {{ brand_name }} in {{ location }}.
+
+Sign in with your email and this temporary password, then change it after your first login:
+
+{{ temporary_password }}
+
+Open Mixed Miles: {{ login_url }}
+
+Keep this password private. If you did not expect this invitation, contact {{ support_email }}.
+{% endblock %}

@@ -1,0 +1,134 @@
+---
+description: Every actor role and its exact permissions, derived from the PRD. Consult whenever writing auth, permission classes, or access checks.
+globs:
+  - "**/permissions.py"
+  - "**/views.py"
+  - "accounts/**"
+alwaysApply: false
+---
+
+# Roles & Permissions (from PRD)
+
+## Authorization principles
+- DEFAULT DENY. Grant only what is listed here.
+- Enforce at the OBJECT level, not just the view level.
+- All permission checks run AFTER tenant scoping (see multi-tenancy rule): a role's
+  permissions only ever apply within the user's own community (except Admin + System).
+- "Registered user" = any authenticated account (Member OR Non-Member).
+- **Product ACL = `User.role` + DRF permission classes** (`apps.accounts.permissions` /
+  `role_checks`). Do **not** use Django Groups / `user_permissions` for product access.
+- **Superadmin** = Django `is_superuser` (alias `User.is_superadmin`). Only superadmin
+  has full Django `/admin` and model permissions. Changing `User.role` must go through
+  `apply_user_role()` so non-superusers lose `is_staff` and Django perms.
+
+## Role hierarchy (access level per PRD)
+| Role | Platform | Level |
+|------|----------|-------|
+| Superadmin (`is_superuser`) | Django /admin + all product gates | Everything |
+| Admin | Web dashboard | Full |
+| City Founder | Web dashboard + Mobile | High |
+| Team Member (Public Speaker / Content Creator) | Web dashboard | Read-only subset |
+| Member | Mobile | Medium |
+| Non-Member | Mobile | Low |
+| Partner | Partner-side tool | Scoped (QR verify only) |
+| System | Automated (Celery/services) | Internal, cross-tenant |
+
+---
+
+## Admin — full control across ALL countries/cities (crosses tenants)
+- Approve/reject City Founder applications.
+- City Founders: view all, view full profile, add manually, edit any field,
+  deactivate, delete. (FR 133–137)
+- Users: view all (Members + Non-Members), search/filter/sort by country/city/
+  subscription/registration date, edit, deactivate, delete. (FR 138–140)
+- Membership: review pending non-expat applications, approve/reject, notify. (FR 148)
+- Events: view all, edit any, delete any. (FR 141–142)
+- Content: view/moderate all posts + comments, remove any post/comment/media. (FR 143–145)
+- Media: view all City Founder media (filterable), delete any. (FR 146–147)
+- Partners/Guidebook: view/add/edit/delete. (FR 149)
+- Store (MVP2): view all listings, search/filter, remove listings, view offer
+  activity per listing. (FR 84, 154–156, 73)
+- Trust: view each founder's score + vote count + per-event breakdown; flag/
+  investigate >20pt drops; review trust comments (Admin-only, never public). (FR 125–126, 128)
+- Analytics: KPIs, filter by country/city/date/user-type, view trends, export Excel. (FR 150–153)
+- Account security: 2FA required; every admin action written to immutable audit log. (FR 131–132)
+
+## City Founder — manages ONE community (tenant-scoped)
+Gains access only after Admin approval of application. (FR 105)
+- Events: create, edit, delete OWN community's events. (FR 160–162)
+  - EDIT RESTRICTION: cannot edit ticket price or location after creation. (FR 161)
+- Join requests: accept/reject Non-Member join requests for own events. (FR 167)
+- Event ops: view own events w/ status, attendee lists, per-event nationality
+  breakdown (used to accept/reject attendees). (FR 165–166, 169, 183)
+- Team: view/add/edit/delete team members (Public Speaker / Content Creator / Other).
+  System enforces minimum ≥2 speakers + ≥1 content creator; block deletions that
+  breach it. (FR 170–174)
+- Partners/Guidebook: add/edit/delete own partner entries. (FR 157–158)
+- Media Area: upload/manage/delete photos + videos; optionally publish to feed. (FR 175–180)
+- Revenue: view earnings + revenue split (ticket sales, Member vs Non-Member,
+  commission), community stats. (FR 114, 181–182)
+- Trust: sees OWN aggregate score only — NEVER individual voter identities. (FR 124, 127)
+- Profile: "City Founder of [City]" label. (FR 103)
+- Also has full Member-level social abilities on mobile (post/like/comment). (actor def)
+- PUBLISH GATE (system-enforced before any event can be published): ≥10 active
+  partners, ≥2 speakers, ≥1 content creator, 3 events/month commitment. (FR 159 + eligibility table)
+
+## Team Member (Public Speaker / Content Creator) — read-only subset
+- Log in to the City Founder Dashboard with own credentials. (FR 184)
+- Read-only access to sections relevant to their role (e.g., event details/attendees). (FR 185)
+- MUST NOT access: financial/revenue data, partner management, team management,
+  event creation/deletion, or join-request approvals. Only the City Founder account
+  holder has full dashboard access. (FR 185)
+
+## Member — paid subscriber (tenant-scoped, mobile)
+- Active paid subscription (monthly/annual). (FR 107)
+- Events: join/purchase tickets INSTANTLY, no prior approval. (FR 41)
+- Membership QR code in profile; used by partners to verify + grant discounts. (FR 51, 97)
+- Discounts: redeem partner discounts via own QR (Active Member only). (Flow A, FR 54)
+- Gatherings: create if attended ≥1 event; join if attended ≥1 event; max 20 attendees. (FR 22, 31, 37)
+- Social: create posts (≤5 images), like, comment, view activity history, follow/
+  connect. (FR 20, 26–30, 94–96, 100)
+- Property (MVP2): list/edit/delete own property; browse/contact. (FR 58–62)
+- Store (MVP2): list UNLIMITED products, edit/delete own, make/accept/counter/decline
+  offers, buy. (FR 64–65, 71, 74, 77–78)
+
+## Non-Member — registered, unsubscribed (tenant-scoped, mobile)
+- Browse home/events/posts/partner listings; like + comment. (FR 18–20, 48)
+- Events: must submit join request requiring City Founder approval; pay only after
+  approval. (FR 42)
+- Discounts: CANNOT redeem; can view Guidebook but NOT use QR verification flow. (FR 57)
+- Gatherings: create if attended ≥3 events; join if attended ≥3 events; max 20. (FR 23, 32, 38)
+- Chat with other users (MVP2 — chat deferred). (actor def)
+- Property (MVP2): browse + rent/contact. (actor def)
+- Store (MVP2): list MAX 1 active product (2nd prompts subscribe), buy, make offers. (FR 66, 74)
+- Social: post/like/comment. (actor def)
+
+## Partner — external, scoped (MVP1)
+- ONLY capability: use the partner-side tool to scan/check a Member's QR code to
+  verify active membership before granting a discount. (FR 53)
+- No app account access beyond this verification flow.
+
+## System — automated actions (internal, cross-tenant via all_tenants escape hatch)
+- Membership: auto-approve expat members without admin review; route non-expat to
+  pending; notify applicant of instant vs pending + ETA. (FR 9–11)
+- QR: generate signed ticket QR (user_id + event_id + tamper-proof token); validate
+  membership/ticket QR server-side ONLY; return member/non-member result. (FR 45, 47, 52, 54–55)
+- Delivery: send tickets/invitations via WhatsApp + email + in-app ≤60s. (FR 43, 46, 168)
+- Logging: log discount redemptions (timestamp/user/partner). (FR 56)
+- Gatherings: reject joins once cap of 20 reached; hide location until joined. (FR 34–35)
+- Subscriptions: handle renewal/expiry/cancellation, pre-expiry + expiry notices,
+  1-week grace then revoke. (FR 109, 111–113)
+- Trust: compute weighted-moving-average score at window close; persist score +
+  cumulative count; keep voter identities hidden. (FR 121–123, 127)
+- Notifications: push on likes/comments/messages/offers/event changes. (FR 29, 72, 163–164)
+
+---
+
+## Known spec conflicts — DO NOT silently resolve; follow these decisions
+- Member event attendance: actor table says "submit a join request (no City Founder
+  approval)" while FR 41 says "join/purchase INSTANTLY without approval." → Treat
+  Members as INSTANT join (FR 41 is the authoritative functional requirement).
+- Gathering eligibility for Non-Members appears as both "1 event" and "3 events" in
+  different tables. → Use **3 events** for Non-Members, **1 event** for Members
+  (consistent with FR 31–32 and Flow D).
+- Duplicate FR IDs exist (37, 38, 59). Map by feature-area context, not ID number.

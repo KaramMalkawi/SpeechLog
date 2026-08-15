@@ -1,0 +1,13 @@
+{% extends "emails/base.txt" %}
+
+{% block body %}
+Hi {{ recipient_name }},
+
+Your join request for {{ event_title }} was approved.
+
+Location: {{ event_location }}
+Starts: {{ event_start }}
+Ends: {{ event_end }}
+
+Complete payment in the app to receive your ticket QR code.
+{% endblock %}

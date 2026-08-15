@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mixed Miles — Verify Test</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 520px; margin: 2rem auto; padding: 0 1rem; }
+    h1 { font-size: 1.25rem; }
+    label { display: block; margin-top: 0.75rem; font-size: 0.9rem; }
+    input, select, button { width: 100%; margin-top: 0.25rem; padding: 0.5rem; box-sizing: border-box; }
+    button { margin-top: 1rem; cursor: pointer; }
+    pre { background: #f4f4f4; padding: 0.75rem; overflow: auto; font-size: 0.8rem; }
+    .hidden { display: none; }
+    .tabs { display: flex; gap: 0.5rem; margin: 1rem 0; }
+    .tabs button { margin-top: 0; flex: 1; }
+    .tabs button.active { font-weight: 600; border: 2px solid #111; }
+  </style>
+</head>
+<body>
+  <h1>Mixed Miles — auth test</h1>
+  <p>Register with ID verification, or log in if you already have a verified account.</p>
+
+  <div class="tabs">
+    <button type="button" id="tab-register" class="active">Register</button>
+    <button type="button" id="tab-login">Login</button>
+  </div>
+
+  <section id="register-panel">
+    <label>First name <input id="reg_first_name" type="text" autocomplete="given-name" /></label>
+    <label>Last name <input id="reg_last_name" type="text" autocomplete="family-name" /></label>
+    <label>Email <input id="reg_email" type="email" autocomplete="email" /></label>
+    <label>Password <input id="reg_password" type="password" autocomplete="new-password" /></label>
+    <button id="register-btn" type="button">Create account</button>
+  </section>
+
+  <section id="login-panel" class="hidden">
+    <label>Email <input id="login_email" type="email" autocomplete="email" /></label>
+    <label>Password <input id="login_password" type="password" autocomplete="current-password" /></label>
+    <button id="login-btn" type="button">Log in</button>
+  </section>
+
+  <section id="verify-section" class="hidden">
+    <h2>Identity verification</h2>
+    <p>Complete Didit OCR to activate your account.</p>
+    <button id="verify-btn" type="button">Open Didit verification</button>
+    <button id="status-btn" type="button">Refresh status</button>
+  </section>
+
+  <pre id="log"></pre>
+
+  <script>
+    const API = window.location.origin + "/api/v1";
+    let registrationToken = localStorage.getItem("mm_registration_token") || "";
+    let accessToken = localStorage.getItem("mm_access_token") || "";
+
+    const log = (msg) => {
+      const el = document.getElementById("log");
+      el.textContent = (typeof msg === "string" ? msg : JSON.stringify(msg, null, 2)) + "\n\n" + el.textContent;
+    };
+
+    async function api(path, options = {}) {
+      const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
+      if (options.auth === "registration" && registrationToken) {
+        headers.Authorization = "Bearer " + registrationToken;
+      }
+      if (options.auth === "access" && accessToken) {
+        headers.Authorization = "Bearer " + accessToken;
+      }
+      const res = await fetch(API + path, { ...options, headers });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw { status: res.status, data };
+      return data;
+    }
+
+    function showTab(tab) {
+      const isRegister = tab === "register";
+      document.getElementById("register-panel").classList.toggle("hidden", !isRegister);
+      document.getElementById("login-panel").classList.toggle("hidden", isRegister);
+      document.getElementById("tab-register").classList.toggle("active", isRegister);
+      document.getElementById("tab-login").classList.toggle("active", !isRegister);
+    }
+
+    document.getElementById("tab-register").onclick = () => showTab("register");
+    document.getElementById("tab-login").onclick = () => showTab("login");
+
+    document.getElementById("register-btn").onclick = async () => {
+      try {
+        const body = {
+          first_name: document.getElementById("reg_first_name").value.trim(),
+          last_name: document.getElementById("reg_last_name").value.trim(),
+          email: document.getElementById("reg_email").value.trim(),
+          password: document.getElementById("reg_password").value,
+        };
+        const data = await api("/accounts/register/", { method: "POST", body: JSON.stringify(body) });
+        registrationToken = data.registration_token;
+        localStorage.setItem("mm_registration_token", registrationToken);
+        log(data);
+        document.getElementById("verify-section").classList.remove("hidden");
+        showTab("register");
+      } catch (e) {
+        log(e);
+      }
+    };
+
+    document.getElementById("verify-btn").onclick = async () => {
+      try {
+        const data = await api("/accounts/register/verification/", {
+          method: "POST",
+          auth: "registration",
+          body: JSON.stringify({ callback_url: window.location.href.split("?")[0] }),
+        });
+        log(data);
+        window.location.href = data.verification_url;
+      } catch (e) {
+        log(e);
+      }
+    };
+
+    document.getElementById("status-btn").onclick = async () => {
+      try {
+        const data = await api("/accounts/register/status/", { auth: "registration" });
+        log(data);
+        if (data.verification_status === "verified") {
+          localStorage.removeItem("mm_registration_token");
+          registrationToken = "";
+          document.getElementById("verify-section").classList.add("hidden");
+          showTab("login");
+          document.getElementById("login_email").value = data.email;
+          log("Verified — switch to Login and sign in.");
+        } else if (data.resident_type === "local" && data.registration_step === 3) {
+          log("Local resident — waiting for admin approval (step 3). You cannot log in yet.");
+        }
+      } catch (e) {
+        log(e);
+      }
+    };
+
+    document.getElementById("login-btn").onclick = async () => {
+      try {
+        const data = await api("/accounts/auth/login/", {
+          method: "POST",
+          body: JSON.stringify({
+            email: document.getElementById("login_email").value.trim(),
+            password: document.getElementById("login_password").value,
+          }),
+        });
+        accessToken = data.access;
+        localStorage.setItem("mm_access_token", accessToken);
+        log(data);
+        const me = await api("/accounts/me/", { auth: "access" });
+        log(me);
+      } catch (e) {
+        log(e);
+      }
+    };
+
+    if (registrationToken) {
+      document.getElementById("verify-section").classList.remove("hidden");
+      showTab("register");
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("returned") || params.get("status") === "Approved") {
+      document.getElementById("status-btn").click();
+    }
+  </script>
+</body>
+</html>

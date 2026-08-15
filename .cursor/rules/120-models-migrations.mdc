@@ -1,0 +1,16 @@
+---
+description: Model and migration conventions
+globs:
+  - "**/models.py"
+  - "**/migrations/*.py"
+alwaysApply: false
+---
+
+# Models & migrations
+
+- Every tenant-scoped model: `community_id` + `city_id`; city-shared: `city_id` only.
+- Use a tenant-aware default manager so queries are filtered by default.
+- Models singular (`Event`, `Membership`). Money = integer minor units / Decimal.
+- Datetimes UTC. Add DB indexes for all filterable fields (city, date, category, price).
+- One logical change per migration. NEVER edit an already-applied migration.
+- Enforce invariants at the DB level where possible (constraints, atomic checks).

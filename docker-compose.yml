@@ -1,0 +1,139 @@
+# Explicit project name avoids volume collisions with other repos also named "backend"
+# (e.g. a markaba stack that previously owned backend_postgres_data).
+name: mixed_miles
+
+# Shared overrides for app containers: inside Docker, services are reached by
+# service name (postgres/redis), not localhost. Host-machine .env may keep localhost.
+# Production frontends (separate compose stacks + NPM):
+#   mixedmiles.com       → Landing-Page
+#   admin.mixedmiles.com → admin-dashboard
+#   CORS must allow both origins (see .env.example).
+x-app-environment: &app-environment
+  DATABASE_URL: postgres://mixed_miles:mixed_miles@postgres:5432/mixed_miles
+  REDIS_URL: redis://redis:6379/0
+  CELERY_BROKER_URL: redis://redis:6379/1
+  CELERY_RESULT_BACKEND: redis://redis:6379/2
+  AWS_S3_ACCESS_KEY_ID: minioadmin
+  AWS_S3_SECRET_ACCESS_KEY: minioadmin
+  AWS_STORAGE_BUCKET_NAME: mixed-miles-media
+  AWS_S3_REGION_NAME: us-east-1
+  AWS_S3_ENDPOINT_URL: http://minio:9000
+  AWS_S3_PUBLIC_ENDPOINT_URL: http://localhost:9000
+  MEDIA_CDN_BASE_URL: http://localhost:9000/mixed-miles-media
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: mixed_miles
+      POSTGRES_USER: mixed_miles
+      POSTGRES_PASSWORD: mixed_miles
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mixed_miles -d mixed_miles"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio:
+    image: minio/minio:latest
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  minio-init:
+    image: minio/mc:latest
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 minioadmin minioadmin &&
+      mc mb local/mixed-miles-media --ignore-existing &&
+      mc anonymous set download local/mixed-miles-media &&
+      exit 0
+      "
+
+  web:
+    build: .
+    command: uvicorn config.asgi:application --host 0.0.0.0 --port 8000 --reload
+    env_file:
+      - .env
+    environment:
+      <<: *app-environment
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  celery_worker:
+    build: .
+    command: celery -A config worker -l info
+    env_file:
+      - .env
+    environment:
+      <<: *app-environment
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+  celery_beat:
+    build: .
+    command: celery -A config beat -l info
+    env_file:
+      - .env
+    environment:
+      <<: *app-environment
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio-init:
+        condition: service_completed_successfully
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

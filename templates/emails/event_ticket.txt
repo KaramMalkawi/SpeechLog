@@ -1,0 +1,13 @@
+{% extends "emails/base.txt" %}
+
+{% block body %}
+Hi {{ recipient_name }},
+
+Your ticket for {{ event_title }} is ready.
+
+Location: {{ event_location }}
+Starts: {{ event_start }}
+Ends: {{ event_end }}
+
+QR payload: {{ ticket_qr_payload }}
+{% endblock %}

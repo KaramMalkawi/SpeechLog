@@ -1,0 +1,21 @@
+---
+description: Security and data-integrity non-negotiables
+alwaysApply: true
+---
+
+# Security & integrity (non-negotiable)
+
+- TLS everywhere. Passwords hashed with Argon2 (fallback bcrypt).
+- QR verification is 100% server-side. Never compute member/discount/ticket
+  validity client-side.
+  - Membership QR = user_id + signed token.
+  - Ticket QR = user_id + event_id + unique tamper-proof token.
+- Rate-limit QR scans in Redis: max 10/min/user.
+- Never store raw card data; rely on gateway tokenization. No payment info on device.
+- ID/passport images + nationality are sensitive PII: encrypt at rest, restrict
+  access, apply a retention policy.
+- All admin actions write to an immutable audit log (who/what/when).
+- Money stored as integer minor units or Decimal — never float.
+- All datetimes UTC; convert only at the edges.
+- Multi-step writes use DB transactions. Payment ops use idempotency keys.
+- Enforce hard caps (e.g., gathering ≤ 20 attendees) atomically in the DB layer.

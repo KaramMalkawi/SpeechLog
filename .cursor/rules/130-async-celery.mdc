@@ -1,0 +1,19 @@
+---
+description: Async task and scheduling rules
+globs:
+  - "**/tasks.py"
+  - "**/celery.py"
+alwaysApply: false
+---
+
+# Async & Celery
+
+Push all slow work off the request path (target <500ms API responses):
+ticket/invitation delivery, push/email/WhatsApp sends, media transcoding,
+redemption logging, trust-score computation, report/Excel exports.
+
+- External calls (gateway, WhatsApp, FCM) must be idempotent + retried with backoff
+  + dead-letter handling. Never lose a ticket on a downstream outage.
+- Celery Beat schedules: subscription renewal/expiry/1-week-grace/revocation,
+  trust-vote window close + weighted-average score update.
+- Analytics/report queries run against the read replica.

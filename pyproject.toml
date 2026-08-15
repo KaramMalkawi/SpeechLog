@@ -1,0 +1,27 @@
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["mypy_django_plugin.main", "mypy_drf_plugin.main"]
+strict = false
+ignore_missing_imports = true
+
+[tool.django-stubs]
+django_settings_module = "config.settings.local"
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.local"
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-ra --strict-markers"
+testpaths = ["apps", "core", "tests"]

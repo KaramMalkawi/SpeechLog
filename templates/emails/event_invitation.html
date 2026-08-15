@@ -1,0 +1,12 @@
+{% extends "emails/base.html" %}
+
+{% block body %}
+<p>Hi {{ recipient_name }},</p>
+<p>Your join request for <strong>{{ event_title }}</strong> was approved.</p>
+<p>
+  Location: {{ event_location }}<br>
+  Starts: {{ event_start }}<br>
+  Ends: {{ event_end }}
+</p>
+<p>Complete payment in the app to receive your ticket QR code.</p>
+{% endblock %}
